@@ -8,16 +8,17 @@ defmodule AshAgentMarketplace.MixProject do
     [
       app: :ash_agent_marketplace,
       version: @version,
-      build_path: "../../_build",
-      config_path: "../../config/config.exs",
-      deps_path: "../../deps",
-      lockfile: "../../mix.lock",
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
+      consolidate_protocols: Mix.env() != :test,
       deps: deps(),
       description: description(),
       package: package(),
-      elixirc_paths: elixirc_paths(Mix.env())
+      docs: docs(),
+      aliases: aliases(),
+      elixirc_paths: elixirc_paths(Mix.env()),
+      dialyzer: dialyzer(),
+      preferred_cli_env: [precommit: :test]
     ]
   end
 
@@ -32,8 +33,27 @@ defmodule AshAgentMarketplace.MixProject do
 
   defp deps do
     [
-      {:ash_agent, in_umbrella: true}
+      {:ash_agent, ash_agent_dep()},
+      {:ex_doc, "~> 0.34", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:plug, "~> 1.16", only: :test}
     ]
+  end
+
+  defp ash_agent_dep do
+    if local_dep?(:ash_agent) do
+      [in_umbrella: true]
+    else
+      [version: "~> 0.1.0"]
+    end
+  end
+
+  defp local_dep?(app) do
+    app
+    |> to_string()
+    |> then(&Path.expand("../#{&1}/mix.exs", __DIR__))
+    |> File.exists?()
   end
 
   defp description do
@@ -51,6 +71,37 @@ defmodule AshAgentMarketplace.MixProject do
       },
       maintainers: ["Bradley Golden"],
       files: ~w(lib .formatter.exs mix.exs README.md LICENSE)
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      source_ref: "v#{@version}",
+      source_url: @source_url,
+      extras: ["README.md"]
+    ]
+  end
+
+  defp aliases do
+    [
+      precommit: [
+        "deps.get",
+        "deps.compile",
+        "deps.unlock --check-unused",
+        "compile --warnings-as-errors",
+        "test --warnings-as-errors",
+        "format --check-formatted",
+        "credo --strict",
+        "dialyzer --format github",
+        "docs --warnings-as-errors"
+      ]
+    ]
+  end
+
+  defp dialyzer do
+    [
+      plt_add_apps: [:mix, :ex_unit]
     ]
   end
 end
