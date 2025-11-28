@@ -34,6 +34,8 @@ defmodule AshAgentMarketplace.MixProject do
   defp deps do
     [
       {:ash_agent, ash_agent_dep()},
+      {:ash_agent_tools, ash_agent_tools_dep()},
+      {:req, "~> 0.5", optional: true},
       {:ex_doc, "~> 0.34", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
@@ -43,6 +45,14 @@ defmodule AshAgentMarketplace.MixProject do
 
   defp ash_agent_dep do
     if local_dep?(:ash_agent) do
+      [in_umbrella: true]
+    else
+      [version: "~> 0.1.0"]
+    end
+  end
+
+  defp ash_agent_tools_dep do
+    if local_dep?(:ash_agent_tools) do
       [in_umbrella: true]
     else
       [version: "~> 0.1.0"]
