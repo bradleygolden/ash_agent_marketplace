@@ -23,12 +23,14 @@ defmodule AshAgentMarketplace.Agents.TitleGenerator do
   use AshAgent.Template
 
   agent do
-    output :string
+    output_schema(Zoi.string())
 
-    input do
-      argument :text, :string, allow_nil?: false, doc: "The text to generate a title for"
-      argument :examples, {:array, :string}, doc: "Example titles to guide the style and format"
-    end
+    input_schema(
+      Zoi.object(%{
+        text: Zoi.string(),
+        examples: Zoi.list(Zoi.string()) |> Zoi.optional()
+      })
+    )
 
     prompt ~p"""
     <task>Generate a concise, compelling title for the following text.</task>
