@@ -17,8 +17,9 @@ defmodule AshAgentMarketplace.Tools.ExaSearchTest do
     agent do
       client "openai:gpt-4o"
       provider :mock
-      prompt "Test agent"
-      output :string
+      instruction("Test agent")
+      input_schema(Zoi.object(%{}, coerce: true))
+      output_schema(Zoi.object(%{message: Zoi.string()}, coerce: true))
     end
   end
 

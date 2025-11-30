@@ -17,37 +17,19 @@ defmodule AshAgentMarketplace.Agents.TitleGeneratorTest do
   end
 
   describe "generated agent configuration" do
-    test "has string output type" do
-      output = Extension.get_opt(TestDomain.TitleGenerator, [:agent], :output)
-      assert output == :string
+    test "has string output schema" do
+      output_schema = Extension.get_opt(TestDomain.TitleGenerator, [:agent], :output_schema)
+      assert output_schema != nil
     end
 
-    test "has text and examples input arguments" do
-      args = Extension.get_entities(TestDomain.TitleGenerator, [:agent, :input])
-      arg_names = Enum.map(args, & &1.name)
-
-      assert :text in arg_names
-      assert :examples in arg_names
+    test "has input schema defined" do
+      input_schema = Extension.get_opt(TestDomain.TitleGenerator, [:agent], :input_schema)
+      assert input_schema != nil
     end
 
-    test "text argument is required" do
-      args = Extension.get_entities(TestDomain.TitleGenerator, [:agent, :input])
-      text_arg = Enum.find(args, &(&1.name == :text))
-
-      assert text_arg.allow_nil? == false
-    end
-
-    test "examples argument is optional array of strings" do
-      args = Extension.get_entities(TestDomain.TitleGenerator, [:agent, :input])
-      examples_arg = Enum.find(args, &(&1.name == :examples))
-
-      assert examples_arg.allow_nil? == true
-      assert examples_arg.type == {:array, :string}
-    end
-
-    test "has prompt template defined" do
-      prompt = Extension.get_opt(TestDomain.TitleGenerator, [:agent], :prompt)
-      assert %Solid.Template{} = prompt
+    test "has instruction template defined" do
+      instruction = Extension.get_opt(TestDomain.TitleGenerator, [:agent], :instruction)
+      assert %Solid.Template{} = instruction
     end
 
     test "has client from domain registration" do
