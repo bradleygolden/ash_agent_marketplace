@@ -13,11 +13,18 @@ defmodule AshAgentMarketplace.Agents.TitleGenerator do
 
   ## Example
 
-      MyApp.Agents.call_title_generator!(
-        text: "This article explores the latest advances in machine learning...",
-        examples: ["The Future of AI", "Why Deep Learning Matters"]
-      )
-      # => "Machine Learning Breakthroughs Transform Industry"
+      context =
+        [
+          TitleGenerator.instruction(),
+          TitleGenerator.user(
+            text: "This article explores the latest advances in machine learning...",
+            examples: ["The Future of AI", "Why Deep Learning Matters"]
+          )
+        ]
+        |> TitleGenerator.context()
+
+      {:ok, result} = TitleGenerator.call(context)
+      # result.output => "Machine Learning Breakthroughs Transform Industry"
   """
 
   use AshAgent.Template
@@ -32,7 +39,7 @@ defmodule AshAgentMarketplace.Agents.TitleGenerator do
       })
     )
 
-    prompt ~p"""
+    instruction(~p"""
     <task>Generate a concise, compelling title for the following text.</task>
     {% for example in examples %}{% if forloop.first %}
 
@@ -45,6 +52,6 @@ defmodule AshAgentMarketplace.Agents.TitleGenerator do
     </text>
 
     Respond with only the title, nothing else.
-    """
+    """)
   end
 end
