@@ -1,6 +1,7 @@
 defmodule AshAgentMarketplace.Agents.TitleGeneratorTest do
   use ExUnit.Case, async: true
 
+  alias Ash.Resource.Info
   alias Spark.Dsl.Extension
 
   defmodule TestDomain do
@@ -56,7 +57,7 @@ defmodule AshAgentMarketplace.Agents.TitleGeneratorTest do
     end
 
     test "generated agent has call and stream actions" do
-      actions = Ash.Resource.Info.actions(TestDomain.TitleGenerator)
+      actions = Info.actions(TestDomain.TitleGenerator)
       action_names = Enum.map(actions, & &1.name)
 
       assert :call in action_names

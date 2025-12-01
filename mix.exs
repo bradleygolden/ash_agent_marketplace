@@ -36,50 +36,41 @@ defmodule AshAgentMarketplace.MixProject do
 
   defp deps do
     [
-      ash_agent_dep(),
-      ash_agent_tools_dep(),
       {:req, "~> 0.5", optional: true},
       {:ex_doc, "~> 0.34", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
+      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:plug, "~> 1.16", only: :test}
-    ]
+    ] ++ sibling_deps()
   end
 
-  defp ash_agent_dep do
-    if skip_local_deps?() do
-      {:ash_agent, "~> 0.3"}
+  defp sibling_deps do
+    if in_umbrella?() do
+      [
+        {:ash_agent, in_umbrella: true},
+        {:ash_agent_tools, in_umbrella: true}
+      ]
     else
-      local_dep_or_hex(:ash_agent, "~> 0.3", "../ash_agent")
+      [
+        {:ash_agent, "~> 0.3"},
+        {:ash_agent_tools, github: "bradleygolden/ash_agent_tools"}
+      ]
     end
   end
 
-  defp ash_agent_tools_dep do
-    if skip_local_deps?() do
-      {:ash_agent_tools, github: "bradleygolden/ash_agent_tools"}
+  defp in_umbrella? do
+    # FORCE_HEX_DEPS=true bypasses umbrella detection for hex.publish
+    if System.get_env("FORCE_HEX_DEPS") == "true" do
+      false
     else
-      local_dep_or_hex(:ash_agent_tools, [github: "bradleygolden/ash_agent_tools"], "../ash_agent_tools")
+      parent_mix = Path.expand("../../mix.exs", __DIR__)
+
+      File.exists?(parent_mix) and
+        parent_mix |> File.read!() |> String.contains?("apps_path")
     end
   end
-
-  defp local_dep_or_hex(dep, opts, path) when is_list(opts) do
-    if File.exists?(Path.expand("#{path}/mix.exs", __DIR__)) do
-      {dep, path: path}
-    else
-      {dep, opts}
-    end
-  end
-
-  defp local_dep_or_hex(dep, version, path) when is_binary(version) do
-    if File.exists?(Path.expand("#{path}/mix.exs", __DIR__)) do
-      {dep, path: path}
-    else
-      {dep, version}
-    end
-  end
-
-  defp skip_local_deps?, do: System.get_env("SKIP_LOCAL_DEPS") == "true"
 
   defp description do
     """
@@ -104,14 +95,21 @@ defmodule AshAgentMarketplace.MixProject do
       main: "readme",
       source_ref: "v#{@version}",
       source_url: @source_url,
-      extras: ["README.md"]
+      extras: ["README.md", "LICENSE"]
     ]
   end
 
   defp aliases do
     [
       precommit: [
-        "cmd SKIP_LOCAL_DEPS=true mix do deps.get, deps.compile, deps.unlock --check-unused, compile --warnings-as-errors, test --warnings-as-errors, format --check-formatted, credo --strict, sobelow --exit, deps.audit, hex.audit, dialyzer, docs --warnings-as-errors"
+        "compile --warnings-as-errors",
+        "test --warnings-as-errors",
+        "format --check-formatted",
+        "credo --strict",
+        "sobelow",
+        "deps.audit",
+        "dialyzer",
+        "docs --warnings-as-errors"
       ]
     ]
   end
