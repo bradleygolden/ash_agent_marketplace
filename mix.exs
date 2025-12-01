@@ -48,27 +48,30 @@ defmodule AshAgentMarketplace.MixProject do
   end
 
   defp ash_agent_dep do
-    if local_dep?(:ash_agent) do
-      [in_umbrella: true]
+    if skip_local_deps?() do
+      "~> 0.3"
     else
-      [version: "~> 0.1.0"]
+      local_dep_or_hex(:ash_agent, "~> 0.3", "../ash_agent")
     end
   end
 
   defp ash_agent_tools_dep do
-    if local_dep?(:ash_agent_tools) do
-      [in_umbrella: true]
+    if skip_local_deps?() do
+      "~> 0.1"
     else
-      [version: "~> 0.1.0"]
+      local_dep_or_hex(:ash_agent_tools, "~> 0.1", "../ash_agent_tools")
     end
   end
 
-  defp local_dep?(app) do
-    app
-    |> to_string()
-    |> then(&Path.expand("../#{&1}/mix.exs", __DIR__))
-    |> File.exists?()
+  defp local_dep_or_hex(dep, version, path) do
+    if File.exists?(Path.expand("#{path}/mix.exs", __DIR__)) do
+      {dep, path: path}
+    else
+      {dep, version}
+    end
   end
+
+  defp skip_local_deps?, do: System.get_env("SKIP_LOCAL_DEPS") == "true"
 
   defp description do
     """
