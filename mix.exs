@@ -36,8 +36,8 @@ defmodule AshAgentMarketplace.MixProject do
 
   defp deps do
     [
-      {:ash_agent, ash_agent_dep()},
-      {:ash_agent_tools, ash_agent_tools_dep()},
+      ash_agent_dep(),
+      ash_agent_tools_dep(),
       {:req, "~> 0.5", optional: true},
       {:ex_doc, "~> 0.34", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
@@ -49,7 +49,7 @@ defmodule AshAgentMarketplace.MixProject do
 
   defp ash_agent_dep do
     if skip_local_deps?() do
-      "~> 0.3"
+      {:ash_agent, "~> 0.3"}
     else
       local_dep_or_hex(:ash_agent, "~> 0.3", "../ash_agent")
     end
@@ -57,13 +57,21 @@ defmodule AshAgentMarketplace.MixProject do
 
   defp ash_agent_tools_dep do
     if skip_local_deps?() do
-      "~> 0.1"
+      {:ash_agent_tools, github: "bradleygolden/ash_agent_tools"}
     else
-      local_dep_or_hex(:ash_agent_tools, "~> 0.1", "../ash_agent_tools")
+      local_dep_or_hex(:ash_agent_tools, [github: "bradleygolden/ash_agent_tools"], "../ash_agent_tools")
     end
   end
 
-  defp local_dep_or_hex(dep, version, path) do
+  defp local_dep_or_hex(dep, opts, path) when is_list(opts) do
+    if File.exists?(Path.expand("#{path}/mix.exs", __DIR__)) do
+      {dep, path: path}
+    else
+      {dep, opts}
+    end
+  end
+
+  defp local_dep_or_hex(dep, version, path) when is_binary(version) do
     if File.exists?(Path.expand("#{path}/mix.exs", __DIR__)) do
       {dep, path: path}
     else
