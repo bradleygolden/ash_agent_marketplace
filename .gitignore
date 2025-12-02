@@ -21,3 +21,4 @@ ash_agent_marketplace-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+.hex-docs
